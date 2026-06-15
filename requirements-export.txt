@@ -1,0 +1,5 @@
+# ── Export-only dependencies (not needed at runtime) ──────────
+torch>=2.4
+sentence-transformers>=3.0
+optimum[onnxruntime]>=1.20
+transformers>=4.45

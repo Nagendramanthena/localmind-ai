@@ -1,0 +1,23 @@
+[project]
+name = "local-agentic-assistant"
+version = "1.0.0"
+description = "A lightweight, fully local agentic AI assistant for Windows — no cloud dependency"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Nagendra Varma"},
+]
+
+[project.scripts]
+export-model = "scripts.export_model:main"
+build-index = "scripts.build_index:main"
+test-pipeline = "scripts.test_pipeline:main"
+
+[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

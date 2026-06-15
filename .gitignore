@@ -1,0 +1,37 @@
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Virtual Environment ──────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Environment Files ────────────────────────────────────────
+.env
+
+# ── ONNX Models (large, export locally) ──────────────────────
+models/onnx/
+
+# ── FAISS Index (build locally) ──────────────────────────────
+data/index/
+
+# ── IDE ───────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Docker ────────────────────────────────────────────────────
+*.log
