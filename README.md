@@ -1,270 +1,156 @@
-<![CDATA[<div align="center">
+<div align="center">
 
-# 🧠 LocalMind AI
+<img src="https://img.icons8.com/3d-fluency/94/brain.png" width="80"/>
 
-### A Fully Offline Agentic AI Assistant for Windows
+# LocalMind AI
 
-**Zero Cloud Dependency · DirectML GPU Acceleration · Self-Healing Retrieval**
+**A Fully Offline Agentic AI Assistant for Windows**
 
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![ONNX Runtime](https://img.shields.io/badge/ONNX_Runtime-DirectML-7B2D8B?style=for-the-badge&logo=onnx&logoColor=white)](https://onnxruntime.ai)
-[![LangGraph](https://img.shields.io/badge/LangGraph-Agentic-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
-[![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.com)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+*Zero Cloud Dependency · DirectML GPU Acceleration · Self-Healing Retrieval*
 
----
+<br/>
 
-*LocalMind is a lightweight agentic AI assistant that runs **entirely on your machine**. It accepts natural language queries, classifies intent using a locally hosted LLM, retrieves context through an ONNX-powered semantic search pipeline, and returns grounded answers — all without sending a single byte to the cloud.*
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![ONNX](https://img.shields.io/badge/ONNX_Runtime-DirectML-7B2D8B?style=flat-square&logo=onnx&logoColor=white)](https://onnxruntime.ai)
+[![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
+[![Ollama](https://img.shields.io/badge/Ollama-000000?style=flat-square&logo=ollama&logoColor=white)](https://ollama.com)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 </div>
 
----
+<br/>
 
-## 🏗️ System Architecture
+> LocalMind is a lightweight agentic AI assistant that runs **entirely on your machine**. It accepts natural language queries, classifies intent using a locally hosted LLM, retrieves context through an ONNX-powered semantic search pipeline, and returns grounded answers — all without sending a single byte to the cloud.
 
-```mermaid
-graph TB
-    subgraph USER["👤 User Interface"]
-        A["Natural Language Query"]
-    end
+<br/>
 
-    subgraph API["⚡ FastAPI Layer"]
-        B["POST /ask"]
-        C["POST /ingest"]
-        D["GET /health"]
-    end
-
-    subgraph AGENT["🤖 LangGraph Agent"]
-        E["Intent Classifier"]
-        F["Context Retriever"]
-        G["Answer Generator"]
-        H["Self-Critique Engine"]
-        I["Query Refiner"]
-        J["Direct Responder"]
-    end
-
-    subgraph ML["🧮 ML Services"]
-        K["ONNX Runtime\n+ DirectML GPU"]
-        L["FAISS Vector Index"]
-        M["Ollama LLM\n(Mistral 7B)"]
-    end
-
-    subgraph DATA["💾 Local Storage"]
-        N["ONNX Model\n(all-MiniLM-L6-v2)"]
-        O["Document Store\n(Markdown/Text)"]
-        P["FAISS Index\n+ Metadata"]
-    end
-
-    A --> B
-    B --> E
-    E -->|"qa / summarize"| F
-    E -->|"chitchat"| J
-    F --> G
-    G --> H
-    H -->|"confidence < 0.6"| I
-    H -->|"confidence ≥ 0.6"| B
-    I --> F
-    J --> B
-
-    F <--> K
-    F <--> L
-    E <--> M
-    G <--> M
-    H <--> M
-    I <--> M
-    J <--> M
-
-    K <--> N
-    L <--> P
-    C --> O
-
-    style USER fill:#1a1a2e,stroke:#e94560,color:#fff
-    style API fill:#16213e,stroke:#0f3460,color:#fff
-    style AGENT fill:#0f3460,stroke:#533483,color:#fff
-    style ML fill:#533483,stroke:#e94560,color:#fff
-    style DATA fill:#1a1a2e,stroke:#533483,color:#fff
-```
-
----
-
-## 🔄 Agent Workflow — The Self-Critique Loop
-
-This is the core intelligence of LocalMind. The agent doesn't just generate answers — it **judges its own output** and iteratively improves until confidence is high enough.
+## How It Works
 
 ```mermaid
 flowchart TD
-    START(["🚀 User Query Received"]) --> CLASSIFY
-
-    CLASSIFY{"🏷️ Intent Classification\n(Ollama)"}
-    CLASSIFY -->|"💬 chitchat"| DIRECT["💬 Direct LLM Response"]
-    CLASSIFY -->|"❓ qa"| EMBED
-    CLASSIFY -->|"📝 summarize"| EMBED
-
-    EMBED["🔢 Embed Query\n(ONNX + DirectML)"]
-    EMBED --> SEARCH["🔍 FAISS Semantic Search\n(Top-K Retrieval)"]
-    SEARCH --> GENERATE["✍️ Generate Answer\n(Ollama + Contexts)"]
-
-    GENERATE --> CRITIQUE{"🧐 Self-Critique\nScore Answer"}
-    CRITIQUE --> SCORE{"📊 Confidence ≥ 0.6?"}
-
-    SCORE -->|"✅ Yes"| ACCEPT["✅ Return Grounded Answer"]
-    SCORE -->|"❌ No"| RETRY{"🔄 Retries < 2?"}
-
-    RETRY -->|"Yes"| REFINE["🔧 Refine Search Query\n(Based on Critique Feedback)"]
-    RETRY -->|"No"| LOWCONF["⚠️ Return Low-Confidence Answer"]
-
-    REFINE --> EMBED
-
-    DIRECT --> DONE(["📤 Response Sent"])
-    ACCEPT --> DONE
-    LOWCONF --> DONE
-
-    style START fill:#00b894,stroke:#00b894,color:#fff
-    style DONE fill:#00b894,stroke:#00b894,color:#fff
-    style CLASSIFY fill:#6c5ce7,stroke:#6c5ce7,color:#fff
-    style EMBED fill:#0984e3,stroke:#0984e3,color:#fff
-    style SEARCH fill:#0984e3,stroke:#0984e3,color:#fff
-    style GENERATE fill:#e17055,stroke:#e17055,color:#fff
-    style CRITIQUE fill:#fdcb6e,stroke:#fdcb6e,color:#000
-    style SCORE fill:#fdcb6e,stroke:#fdcb6e,color:#000
-    style ACCEPT fill:#00b894,stroke:#00b894,color:#fff
-    style REFINE fill:#e84393,stroke:#e84393,color:#fff
-    style RETRY fill:#d63031,stroke:#d63031,color:#fff
-    style LOWCONF fill:#d63031,stroke:#d63031,color:#fff
-    style DIRECT fill:#74b9ff,stroke:#74b9ff,color:#000
+    A([User Query]) --> B[Intent Classifier]
+    B -->|qa / summarize| C[ONNX Embedder]
+    B -->|chitchat| D[Direct LLM Response]
+    C --> E[FAISS Search]
+    E --> F[Answer Generator]
+    F --> G{Self-Critique}
+    G -->|score >= 0.6| H([Return Answer])
+    G -->|score < 0.6| I{Retries left?}
+    I -->|yes| J[Refine Query]
+    I -->|no| K([Return Low-Confidence Answer])
+    J --> C
+    D --> H
 ```
 
----
+<br/>
 
-## 🧮 Embedding & Retrieval Pipeline
+## Architecture
 
-```mermaid
-flowchart LR
-    subgraph EXPORT["📦 One-Time Setup"]
-        A["PyTorch\nSentence-Transformer"] -->|"Optimum Export"| B["ONNX Model\n(all-MiniLM-L6-v2)"]
-        B -->|"Optional"| C["INT8 Quantized\nONNX Model"]
-    end
-
-    subgraph INGEST["📥 Document Ingestion"]
-        D["Markdown / Text\nDocuments"] -->|"Recursive Chunking\n(512 chars, 64 overlap)"| E["Text Chunks"]
-        E -->|"ONNX Embedding"| F["384-dim Vectors"]
-        F -->|"Index"| G["FAISS IndexFlatIP"]
-    end
-
-    subgraph QUERY["🔍 Query Time"]
-        H["User Query"] -->|"ONNX Embedding"| I["384-dim Query Vector"]
-        I -->|"Inner Product Search"| G
-        G -->|"Top-K Results"| J["Ranked Chunks\n+ Similarity Scores"]
-    end
-
-    style EXPORT fill:#2d3436,stroke:#636e72,color:#fff
-    style INGEST fill:#2d3436,stroke:#636e72,color:#fff
-    style QUERY fill:#2d3436,stroke:#636e72,color:#fff
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        FastAPI Server                           │
+│                   POST /ask  ·  POST /ingest                    │
+│                   GET /health  ·  GET /stats                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   ┌───────────┐    ┌──────────────┐    ┌───────────────────┐   │
+│   │  Intent    │    │   Context    │    │     Answer        │   │
+│   │ Classifier │───▶│  Retriever   │───▶│   Generator       │   │
+│   └───────────┘    └──────────────┘    └────────┬──────────┘   │
+│        │                  ▲                      │              │
+│        │                  │                      ▼              │
+│        │           ┌──────┴──────┐      ┌──────────────┐       │
+│        │           │   Query     │◀─────│ Self-Critique │       │
+│        │           │  Refiner    │      │    Engine     │       │
+│        │           └─────────────┘      └──────────────┘       │
+│        │                                                        │
+│        ▼                                                        │
+│   ┌──────────────────────────────────────────────────────────┐  │
+│   │              LangGraph StateGraph Orchestration           │  │
+│   └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+├──────────────────┬──────────────────┬───────────────────────────┤
+│   Ollama LLM     │   ONNX Runtime   │     FAISS Index          │
+│   (Mistral 7B)   │   (DirectML GPU)  │  (Vector Search)        │
+│   localhost:11434 │   all-MiniLM-L6  │   IndexFlatIP           │
+└──────────────────┴──────────────────┴───────────────────────────┘
 ```
 
----
+<br/>
 
-## 📊 Self-Critique Scoring Rubric
+## The Self-Critique Loop
 
-The agent evaluates every generated answer before returning it:
+The agent doesn't just answer — it **judges its own output** and iteratively improves.
 
-```mermaid
-pie title Confidence Score Composition
-    "Relevance (40%)" : 40
-    "Groundedness (40%)" : 40
-    "Completeness (20%)" : 20
+```
+         ┌──────────────────────────────────────────────┐
+         │              Scoring Rubric                   │
+         ├──────────────┬─────────┬─────────────────────┤
+         │  Dimension   │ Weight  │  What it measures    │
+         ├──────────────┼─────────┼─────────────────────┤
+         │  Relevance   │  40%    │  Addresses question? │
+         │  Groundedness│  40%    │  Backed by context?  │
+         │  Completeness│  20%    │  Covers all aspects? │
+         └──────────────┴─────────┴─────────────────────┘
+
+         Score = 0.4×relevance + 0.4×groundedness + 0.2×completeness
+
+         If score < 0.6 → refine query → re-retrieve → re-generate
+         Max 2 retries before returning low-confidence answer
 ```
 
-| Dimension | Weight | Score Range | Description |
-|:---|:---:|:---:|:---|
-| **Relevance** | 40% | 0.0 – 1.0 | Does the answer directly address the question? |
-| **Groundedness** | 40% | 0.0 – 1.0 | Is every claim supported by retrieved context? |
-| **Completeness** | 20% | 0.0 – 1.0 | Does it cover all answerable aspects? |
+<br/>
 
-> **Threshold:** If `weighted_score < 0.6`, the agent refines its search query using the critique feedback and re-retrieves (up to 2 retries).
+## Quick Start
 
----
-
-## 🚀 Quick Start
-
-### Option A: Docker (Recommended)
+### Docker (Recommended)
 
 ```bash
-# Clone the repository
 git clone https://github.com/Nagendramanthena/localmind-ai.git
 cd localmind-ai
-
-# Start everything (Ollama + Agent API)
 docker-compose up --build
+```
 
-# Test it!
+That's it. Ollama + the agent start automatically. Test with:
+
+```bash
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
   -d '{"query": "What is deep learning?"}'
 ```
 
-### Option B: Native Windows Setup
+### Native Windows
 
-```mermaid
-flowchart LR
-    A["1️⃣ Install\nPython 3.11+\n& Ollama"] --> B["2️⃣ Export\nONNX Model"]
-    B --> C["3️⃣ Build\nFAISS Index"]
-    C --> D["4️⃣ Start\nAPI Server"]
-    D --> E["5️⃣ Query\nvia curl/browser"]
-
-    style A fill:#00b894,stroke:#00b894,color:#fff
-    style B fill:#0984e3,stroke:#0984e3,color:#fff
-    style C fill:#6c5ce7,stroke:#6c5ce7,color:#fff
-    style D fill:#e17055,stroke:#e17055,color:#fff
-    style E fill:#fdcb6e,stroke:#fdcb6e,color:#000
-```
-
-#### Step 1: Install Dependencies
+**Prerequisites:** Python 3.11+ · [Ollama](https://ollama.com/download/windows) · DirectX 12 GPU *(optional)*
 
 ```bash
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate
-
-# Install runtime dependencies
+# 1. Setup
+python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
-
-# For DirectML GPU acceleration (Windows only):
-pip uninstall onnxruntime
-pip install onnxruntime-directml
-
-# Install and start Ollama, then pull the model
 ollama pull mistral:7b
-```
 
-#### Step 2: Export Embedding Model to ONNX
+# 2. For GPU acceleration (optional)
+pip uninstall onnxruntime && pip install onnxruntime-directml
 
-```bash
+# 3. Export embedding model to ONNX
 pip install -r requirements-export.txt
-python scripts/export_model.py            # Standard export
-python scripts/export_model.py --quantize  # With INT8 quantization
-```
+python scripts/export_model.py
 
-#### Step 3: Build the Search Index
+# 4. Build search index
+python scripts/build_index.py
 
-```bash
-python scripts/build_index.py                       # Index sample docs
-python scripts/build_index.py --docs /path/to/docs   # Index your own docs
-```
-
-#### Step 4: Start the Server
-
-```bash
-copy .env.example .env    # Edit configuration as needed
+# 5. Run
+copy .env.example .env
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
----
+<br/>
 
-## 📡 API Reference
+## API
 
-### `POST /ask` — Query the Agent
+### `POST /ask` — Query the agent
 
 ```bash
 curl -X POST http://localhost:8000/ask \
@@ -272,12 +158,11 @@ curl -X POST http://localhost:8000/ask \
   -d '{"query": "What is machine learning?", "top_k": 5}'
 ```
 
-<details>
-<summary>📋 Example Response</summary>
+Response:
 
 ```json
 {
-  "answer": "Machine learning (ML) is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed. According to the knowledge base, it focuses on developing programs that can access data and learn for themselves. There are three main types: Supervised Learning (trained on labeled data), Unsupervised Learning (finds patterns in unlabeled data), and Reinforcement Learning (learns through rewards).",
+  "answer": "Machine learning is a subset of AI that enables systems to learn from experience...",
   "intent": "qa",
   "confidence": 0.87,
   "sources": ["machine_learning.md"],
@@ -286,185 +171,159 @@ curl -X POST http://localhost:8000/ask \
     "relevance": 0.92,
     "groundedness": 0.88,
     "completeness": 0.78,
-    "feedback": "Answer comprehensively covers the definition and types. Could mention deep learning as a subset."
+    "feedback": "Comprehensive coverage of definition and types."
   }
 }
 ```
 
-</details>
-
-### `POST /ingest` — Add Documents at Runtime
+### `POST /ingest` — Add documents at runtime
 
 ```bash
 curl -X POST http://localhost:8000/ingest \
   -H "Content-Type: application/json" \
-  -d '{"texts": ["Your new document content..."], "metadata": [{"source": "new_doc.md"}]}'
+  -d '{"texts": ["New document content..."], "metadata": [{"source": "doc.md"}]}'
 ```
 
-### `GET /health` — Health Check
+### `GET /health` · `GET /stats`
 
 ```bash
 curl http://localhost:8000/health
-# {"status": "healthy", "ollama": true, "onnx": true, "index_size": 42}
+# → {"status": "healthy", "ollama": true, "onnx": true, "index_size": 42}
+
+curl http://localhost:8000/stats
+# → {"index_size": 42, "embedding_dimension": 384, "ollama_model": "mistral:7b", ...}
 ```
 
-### `GET /stats` — Index Statistics
+<br/>
+
+## Embedding Pipeline
+
+```mermaid
+flowchart LR
+    A[PyTorch Model] -->|Optimum Export| B[ONNX Model]
+    B -->|Optional| C[INT8 Quantized]
+    D[Documents] -->|Chunk 512c / 64 overlap| E[Text Chunks]
+    E -->|ONNX Embed| F[384-dim Vectors]
+    F --> G[(FAISS Index)]
+    H[User Query] -->|ONNX Embed| I[Query Vector]
+    I -->|Inner Product| G
+    G --> J[Top-K Results]
+```
+
+<br/>
+
+## DirectML GPU Support
+
+ONNX Runtime + DirectML gives **hardware-agnostic** GPU acceleration on Windows:
+
+```mermaid
+flowchart LR
+    A[ONNX Model] --> B[ONNX Runtime]
+    B --> C[DirectML]
+    C --> D[NVIDIA]
+    C --> E[AMD]
+    C --> F[Intel]
+    C --> G[Qualcomm]
+```
 
 ```bash
-curl http://localhost:8000/stats
-# {"index_size": 42, "embedding_dimension": 384, "ollama_model": "mistral:7b", ...}
+pip uninstall onnxruntime
+pip install onnxruntime-directml
+# Set ONNX_PROVIDERS=auto in .env — it auto-detects
 ```
 
----
+<br/>
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 localmind-ai/
-├── 📂 app/
-│   ├── main.py                    # FastAPI entry point & endpoints
-│   ├── config.py                  # Centralized settings (from .env)
-│   ├── 📂 agent/
-│   │   ├── graph.py               # LangGraph StateGraph wiring
-│   │   ├── nodes.py               # All graph node functions
-│   │   └── prompts.py             # Prompt templates (easily tunable)
-│   ├── 📂 models/
-│   │   ├── schemas.py             # Pydantic API request/response models
-│   │   └── state.py               # LangGraph shared state definition
-│   ├── 📂 services/
-│   │   ├── embedding_service.py   # ONNX Runtime inference (DirectML)
-│   │   ├── llm_service.py         # Ollama LLM wrapper
-│   │   └── retrieval_service.py   # FAISS vector search + persistence
-│   └── 📂 utils/
-│       └── logging.py             # Structured logging (structlog)
-├── 📂 scripts/
+├── app/
+│   ├── main.py                    # FastAPI endpoints
+│   ├── config.py                  # Settings from .env
+│   ├── agent/
+│   │   ├── graph.py               # LangGraph workflow
+│   │   ├── nodes.py               # Node functions
+│   │   └── prompts.py             # Tunable prompt templates
+│   ├── models/
+│   │   ├── schemas.py             # Request/response models
+│   │   └── state.py               # Agent state definition
+│   ├── services/
+│   │   ├── embedding_service.py   # ONNX inference + DirectML
+│   │   ├── llm_service.py         # Ollama wrapper
+│   │   └── retrieval_service.py   # FAISS search + persistence
+│   └── utils/
+│       └── logging.py             # Structured logging
+├── scripts/
 │   ├── export_model.py            # PyTorch → ONNX export
-│   └── build_index.py             # Document → FAISS ingestion
-├── 📂 data/
-│   ├── 📂 documents/              # Knowledge base (markdown/text files)
-│   └── 📂 index/                  # Persisted FAISS index + metadata
-├── 📂 models/
-│   └── 📂 onnx/                   # Exported ONNX model + tokenizer
-├── Dockerfile                     # Multi-stage build (no PyTorch in runtime!)
-├── docker-compose.yml             # Ollama sidecar + Agent API
-├── requirements.txt               # Runtime Python dependencies
-├── requirements-export.txt        # Export-only deps (PyTorch, Optimum)
-├── .env.example                   # Configuration template
-└── README.md
+│   └── build_index.py             # Document ingestion
+├── data/documents/                # Knowledge base files
+├── models/onnx/                   # Exported ONNX model
+├── Dockerfile                     # Multi-stage (no PyTorch in runtime)
+├── docker-compose.yml             # Ollama + Agent
+├── requirements.txt
+├── requirements-export.txt
+└── .env.example
 ```
 
----
+<br/>
 
-## ⚙️ Configuration
-
-All settings are controlled via environment variables or a `.env` file:
+## Configuration
 
 | Variable | Default | Description |
 |:---|:---|:---|
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `OLLAMA_MODEL` | `mistral:7b` | LLM model for intent/generation/critique |
-| `EMBEDDING_MODEL_PATH` | `./models/onnx` | Path to exported ONNX model |
-| `ONNX_PROVIDERS` | `auto` | `auto` / `DmlExecutionProvider` / `CPUExecutionProvider` |
-| `FAISS_INDEX_PATH` | `./data/index` | FAISS index persistence directory |
-| `TOP_K` | `5` | Context chunks per retrieval |
-| `CONFIDENCE_THRESHOLD` | `0.6` | Self-critique pass/fail threshold |
-| `MAX_RETRIES` | `2` | Max re-retrieval attempts on low confidence |
-| `CHUNK_SIZE` | `512` | Document chunk size (characters) |
-| `CHUNK_OVERLAP` | `64` | Overlap between consecutive chunks |
-| `LOG_LEVEL` | `INFO` | `DEBUG` / `INFO` / `WARNING` / `ERROR` |
+| `OLLAMA_MODEL` | `mistral:7b` | LLM model name |
+| `EMBEDDING_MODEL_PATH` | `./models/onnx` | ONNX model directory |
+| `ONNX_PROVIDERS` | `auto` | `auto` · `DmlExecutionProvider` · `CPUExecutionProvider` |
+| `FAISS_INDEX_PATH` | `./data/index` | Index storage path |
+| `TOP_K` | `5` | Chunks per retrieval |
+| `CONFIDENCE_THRESHOLD` | `0.6` | Self-critique pass threshold |
+| `MAX_RETRIES` | `2` | Re-retrieval attempts |
+| `CHUNK_SIZE` | `512` | Document chunk size |
+| `CHUNK_OVERLAP` | `64` | Chunk overlap |
+| `LOG_LEVEL` | `INFO` | Logging level |
 
----
+<br/>
 
-## 🖥️ DirectML GPU Acceleration (Windows)
+## Docker Setup
 
-LocalMind uses ONNX Runtime with **DirectML** for hardware-agnostic GPU acceleration on Windows:
+The Dockerfile uses a **multi-stage build** to keep the runtime image lean:
 
-```mermaid
-flowchart LR
-    A["ONNX Model"] --> B["ONNX Runtime"]
-    B --> C{"DirectML\nExecution Provider"}
-    C --> D["🟢 NVIDIA GPU"]
-    C --> E["🔴 AMD GPU"]
-    C --> F["🔵 Intel GPU"]
-    C --> G["🟡 Qualcomm GPU"]
+| Stage | Contains | Size |
+|:---|:---|:---|
+| **Builder** | PyTorch + Optimum → exports ONNX model | ~4 GB (discarded) |
+| **Runtime** | ONNX Runtime + FastAPI + FAISS | ~1.2 GB |
 
-    style C fill:#7B2D8B,stroke:#7B2D8B,color:#fff
-    style D fill:#76b900,stroke:#76b900,color:#fff
-    style E fill:#ed1c24,stroke:#ed1c24,color:#fff
-    style F fill:#0071c5,stroke:#0071c5,color:#fff
-    style G fill:#3253dc,stroke:#3253dc,color:#fff
-```
+`docker-compose.yml` runs three services:
 
-**Setup:**
-```bash
-pip uninstall onnxruntime
-pip install onnxruntime-directml
-```
+| Service | Role | Port |
+|:---|:---|:---|
+| `ollama` | Local LLM server | 11434 |
+| `ollama-init` | Pulls `mistral:7b` on first run | — |
+| `agent` | FastAPI application | 8000 |
 
-> Works with **any DirectX 12 capable GPU**. Set `ONNX_PROVIDERS=auto` and LocalMind auto-detects DirectML on Windows, falling back to CPU elsewhere.
+<br/>
 
----
+## Troubleshooting
 
-## 🐳 Docker Architecture
-
-```mermaid
-flowchart TB
-    subgraph COMPOSE["docker-compose.yml"]
-        subgraph OLLAMA["🦙 Ollama Container"]
-            O1["Ollama Server\n:11434"]
-            O2["Model Storage\n(Volume)"]
-        end
-
-        subgraph INIT["🔄 Init Container"]
-            I1["ollama pull mistral:7b"]
-        end
-
-        subgraph AGENT["🤖 Agent Container"]
-            A1["FastAPI + Uvicorn\n:8000"]
-            A2["ONNX Model\n(baked in)"]
-            A3["FAISS Index\n(mounted)"]
-        end
-    end
-
-    INIT -->|"depends_on"| OLLAMA
-    AGENT -->|"OLLAMA_BASE_URL"| OLLAMA
-
-    style COMPOSE fill:#1a1a2e,stroke:#2496ED,color:#fff
-    style OLLAMA fill:#16213e,stroke:#0f3460,color:#fff
-    style INIT fill:#16213e,stroke:#0f3460,color:#fff
-    style AGENT fill:#16213e,stroke:#0f3460,color:#fff
-```
-
-The Dockerfile uses a **multi-stage build**:
-- **Stage 1 (builder):** Includes PyTorch + Optimum → exports ONNX model
-- **Stage 2 (runtime):** Lean image (~1.2 GB) with only ONNX Runtime, no PyTorch
-
----
-
-## 🔧 Troubleshooting
-
-| Issue | Solution |
+| Problem | Fix |
 |:---|:---|
-| `No .onnx file found` | Run `python scripts/export_model.py` first |
-| `Connection refused` to Ollama | Start Ollama: `ollama serve` |
-| Empty search results | Build the index: `python scripts/build_index.py` |
-| DirectML not detected | Falls back to CPU automatically; check DirectX 12 support |
-| Out of GPU memory | Use a smaller LLM: `ollama pull phi3:mini` |
-| Slow first request | Normal — ONNX graph compilation on first inference |
+| `No .onnx file found` | Run `python scripts/export_model.py` |
+| Ollama connection refused | Run `ollama serve` |
+| Empty search results | Run `python scripts/build_index.py` |
+| DirectML not detected | Auto-falls back to CPU |
+| Out of GPU memory | Switch to `phi3:mini` |
+| Slow first request | Normal — one-time ONNX graph compilation |
 
----
-
-## 📄 License
-
-MIT — use it however you like.
+<br/>
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for fully offline AI**
+**Built for fully offline AI · Your data never leaves your machine**
 
-*Your data never leaves your machine.*
+MIT License
 
 </div>
-]]>
